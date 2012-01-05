@@ -40,6 +40,7 @@
 
 #include "logging.h"
 #include "auth.h"
+#include "chardet.h"
 
 #define CATMODULE "admin"
 
@@ -963,10 +964,63 @@ static int command_metadata (client_t *client, source_t *source, int response)
             if (response == RAW && connection_check_admin_pass (client->parser) == 0)
                 same_ip = 0;
 
+	/* Update stream metadata if needed */
+	if (same_ip) {
+		static const struct {
+			const char		*param;
+			const char		*stat_name;
+			const char		*hdr[3];
+		} fwd[] = {
+			{"xstreamname",			"server_name", 			{"ice-name",		"icy-name",			"x-audiocast-name"}},
+			{"xstreamdesc",			"server_description",	{"ice-description",	"icy-description",	"x-audiocast-description"}},
+			{"xstreamurl",			"server_url",			{"ice-url",			"icy-url",			"x-audiocast-url"}},
+			{"xstreamgenre",		"genre",				{"ice-genre",		"icy-genre",		"x-audiocast-genre"}}
+		};
+		unsigned i;
+		for (i = 0; i < sizeof(fwd) / sizeof(*fwd); i++) {
+			const char *value;
+			unsigned j;
+			COMMAND_OPTIONAL(client, fwd[i].param, value);
+			if (value && *value) {
+				value = auto_recode(value);
+				if (source->format->charset)
+					stats_set_conv (source->stats, fwd[i].stat_name, value, source->format->charset);
+				else
+					stats_set (source->stats, fwd[i].stat_name, value);
+			} else if (value) {
+				stats_set (source->stats, fwd[i].stat_name, NULL);
+			}
+			for (j = 0; j < 3; j++) {
+				if (j == 0 && value && *value) {
+					httpp_setvar(source->format->parser, fwd[i].hdr[j], value);
+				} else if (value && !*value) {
+					httpp_deletevar(source->format->parser, fwd[i].hdr[j]);
+				}
+			}
+		}
+
+	}
+
     do
     {
         if (same_ip == 0 || plugin == NULL)
             break;
+		/* Charset detection (if none specified) */
+		if (!charset) {
+			const char *r;
+			int len;
+			charset = "UTF8";
+#define CCONV(s) \
+			if (s && (r = auto_recode(s))) { \
+				len = strlen(r); \
+				s = alloca(len + 1); \
+				memcpy((char*)s, r, len + 1); \
+			}
+			CCONV(title);
+			CCONV(song);
+			CCONV(artist);
+		}
+		/* Now send prepared metadata */
         if (artwork)
             stats_event (source->mount, "artwork", artwork);
         if (plugin->set_tag)
