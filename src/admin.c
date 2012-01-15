@@ -936,7 +936,6 @@ static int command_fallback (client_t *client, source_t *source, int response)
     return client_send_400 (client, "no mount details available");
 }
 
-
 static int command_metadata (client_t *client, source_t *source, int response)
 {
     const char *song, *title, *artist, *artwork, *charset, *url;
