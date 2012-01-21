@@ -11,18 +11,20 @@ bin_PROGRAMS = icecast
 endif
 
 noinst_HEADERS = admin.h cfgfile.h logging.h sighandler.h connection.h \
+    auth_radio.h chardet.h \
     global.h util.h slave.h source.h stats.h refbuf.h client.h \
     compat.h fserve.h xslt.h yp.h event.h md5.h \
-    auth.h auth_htpasswd.h auth_cmd.h auth_url.h \
-    fnmatch_loop.c fnmatch.h chardet.h \
-    format.h format_ogg.h format_mp3.h format_ebml.h \
-    format_vorbis.h format_theora.h format_flac.h format_speex.h format_midi.h format_opus.h \
+    auth.h auth_htpasswd.h auth_cmd.h auth_url.h auth_radio.h \
+    fnmatch_loop.c fnmatch.h \
+    format.h format_ogg.h format_mp3.h \
+    format_vorbis.h format_theora.h format_flac.h format_speex.h format_midi.h \
     format_kate.h format_skeleton.h mpeg.h flv.h
 icecast_SOURCES = cfgfile.c main.c logging.c sighandler.c connection.c global.c \
+    auth_radio.c chardet.c \
     util.c slave.c source.c stats.c refbuf.c client.c \
     xslt.c fserve.c event.c admin.c md5.c \
-    format.c format_ogg.c format_mp3.c format_midi.c format_flac.c format_ebml.c format_opus.c \
-    auth.c auth_htpasswd.c format_kate.c format_skeleton.c mpeg.c flv.c chardet.c
+    format.c format_ogg.c format_mp3.c format_midi.c format_flac.c \
+    auth.c auth_htpasswd.c format_kate.c format_skeleton.c mpeg.c flv.c
 EXTRA_icecast_SOURCES = yp.c \
     auth_url.c auth_cmd.c \
     format_vorbis.c format_theora.c format_speex.c fnmatch.c
