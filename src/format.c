@@ -86,8 +86,9 @@ void format_plugin_clear (format_plugin_t *format, client_t *client)
         return;
     if (format->free_plugin)
         format->free_plugin (format, client);
-    free (format->charset);
-    if (format->parser && format->parser != client->parser) // a relay client may have a new parser
+	if (format->charset)
+		free (format->charset);
+    if (format->parser && client && format->parser != client->parser) // a relay client may have a new parser
         httpp_destroy (format->parser);
     memset (format, 0, sizeof (format_plugin_t));
 }
