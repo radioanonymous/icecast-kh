@@ -14,6 +14,7 @@
 #include <config.h>
 #endif
 
+#include "chardet.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -1461,8 +1462,11 @@ void stats_set_conv (long handle, const char *name, const char *value, const cha
         }
         WARN1 ("No charset found for \"%s\"", charset);
         return;
-    }
-    stats_set_entity_decode (handle, name, value);
+    } else {
+		/* Auto detect encoding */
+		char buf[ARC_BUF_SIZE];
+		stats_set_entity_decode (handle, name, auto_recode_r(buf, value));
+	}
 }
 
 

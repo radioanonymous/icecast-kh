@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include <iconv.h>
 
-#define MAX_BUFSIZE		512
+#define MAX_BUFSIZE		ARC_BUF_SIZE
 
 typedef unsigned char guchar;
 typedef unsigned gunichar;
@@ -162,10 +162,9 @@ is_ascii_string (const char *str)
 }
 
 const char *
-auto_recode(const char *utf_str)
+auto_recode_r(char *result_buf, const char *utf_str)
 {
 	char *res;
-	static char result_buf[MAX_BUFSIZE];
 	if (is_ascii_string (utf_str)) {
 		res = (char*)utf_str;
 	} else if (utf8_validate (utf_str)) {
@@ -191,6 +190,13 @@ auto_recode(const char *utf_str)
 		if (!res) res = (char*)utf_str;
 	}
 	return res;
+}
+
+const char *
+auto_recode(const char *utf_str)
+{
+	static char result_buf[MAX_BUFSIZE];
+	return auto_recode_r(result_buf, utf_str);
 }
 
 #if 0
