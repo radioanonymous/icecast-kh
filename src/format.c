@@ -208,7 +208,13 @@ int format_general_headers (format_plugin_t *plugin, client_t *client)
         off_t pos1, pos2 = -1;
         const char *range = httpp_getvar (client->parser, "range");
 
-        if (useragent)
+		if ((plugin->type == FORMAT_TYPE_AAC || plugin->type == FORMAT_TYPE_MPEG)
+				&& httpp_getvar(client->parser, "icy-metadata"))
+		{
+			protocol = "ICY";
+			contenttypehdr = "content-type";
+		}
+		else if (useragent)
         {
             const char *resp = httpp_get_query_param (client->parser, "_hdr");
             int fmtcode = 0;
